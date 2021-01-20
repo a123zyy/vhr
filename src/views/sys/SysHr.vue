@@ -153,14 +153,14 @@
             initAllRoles() {
                 client.get("/system/hr/roles").then(resp => {
                     if (resp) {
-                        this.allroles = resp;
+                        this.allroles = resp.data;
                     }
                 })
             },
             initHrs() {
                 client.get("/system/hr/?keywords="+this.keywords).then(resp => {
                     if (resp) {
-                        this.hrs = resp;
+                        this.hrs = resp.data;
                     }
                 })
             }
