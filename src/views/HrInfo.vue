@@ -198,7 +198,7 @@
             initHr() {
                 client.get('/hr/info').then(resp => {
                     if (resp) {
-                        this.hr = resp;
+                        this.hr = resp.data;
                         this.hr2 = Object.assign({}, this.hr);
                         window.sessionStorage.setItem("user", JSON.stringify(resp));
                         this.$store.commit('INIT_CURRENTHR', resp);

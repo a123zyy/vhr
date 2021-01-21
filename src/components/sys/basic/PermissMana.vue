@@ -118,6 +118,7 @@
                 selectedKeys.forEach(key => {
                     url += '&mids=' + key;
                 })
+                console.log(url)
                 client.put(url).then(resp => {
                     if (resp) {
                         this.activeName = -1;
