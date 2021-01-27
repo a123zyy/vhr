@@ -4,6 +4,7 @@ import { Notification } from 'element-ui';
 import {getRequest} from "../utils/api";
 import '../utils/stomp'
 import '../utils/sockjs'
+import client from "../modules/client";
 
 Vue.use(Vuex)
 
@@ -78,9 +79,9 @@ const store = new Vuex.Store({
         },
         initData(context) {
             context.commit('INIT_DATA')
-            getRequest("/chat/hrs").then(resp => {
+            client.get("/chat/hrs").then(resp => {
                 if (resp) {
-                    context.commit('INIT_HR', resp);
+                    context.commit('INIT_HR', resp.data);
                 }
             })
         }
