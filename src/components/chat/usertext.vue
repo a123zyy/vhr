@@ -20,11 +20,17 @@
         ]),
         methods: {
             addMessage(e) {
+                 // var target = "ws://localhost:8082/ws/message";
+                 // var  websocket = new WebSocket(target);
+
                 if (e.ctrlKey && e.keyCode === 13 && this.content.length) {
                     let msgObj = new Object();
                     msgObj.to = this.currentSession.username;
                     msgObj.content = this.content;
+                    // console.log(msgObj,"oldmsgObj")
+                    // websocket.send(msgObj)
                     this.$store.state.stomp.send('/ws/chat', {}, JSON.stringify(msgObj));
+                    console.log(msgObj,"msgObj")
                     this.$store.commit('addMessage', msgObj);
                     this.content = '';
                 }

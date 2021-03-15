@@ -376,6 +376,9 @@
                 body = '';
             }
             headers.destination = destination;
+            console.log(destination,"destination")
+            console.log(headers,"headers")
+            console.log(body,"body")
             return this._transmit("SEND", headers, body);
         };
 

@@ -758,6 +758,7 @@ SockJS.prototype.close = function(code, reason) {
 };
 
 SockJS.prototype.send = function(data) {
+  console.log(data,"sock.js->data")
   // #13 - convert anything non-string to string
   // TODO this currently turns objects into [object Object]
   if (typeof data !== 'string') {
@@ -773,7 +774,6 @@ SockJS.prototype.send = function(data) {
 };
 
 SockJS.version = require('./version');
-
 SockJS.CONNECTING = 0;
 SockJS.OPEN = 1;
 SockJS.CLOSING = 2;
@@ -2949,9 +2949,10 @@ function WebSocketTransport(transUrl, ignore, options) {
   } else {
     url = 'ws' + url.slice(4);
   }
-  this.url = url;
-
+  console.log(url,"原url")
+  this.url = url.replace('//localhost:8080/', '//localhost:8082/');
   this.ws = new WebsocketDriver(this.url, [], options);
+  console.log(this.ws);
   this.ws.onmessage = function(e) {
     debug('message event', e.data);
     self.emit('message', e.data);

@@ -57,7 +57,9 @@ const store = new Vuex.Store({
     },
     actions: {
         connect(context) {
-            context.state.stomp = Stomp.over(new SockJS('/ws/ep'));
+            let socket = new SockJS('/ws/ep')
+            context.state.stomp = Stomp.over(socket);
+            console.log(context.state.stomp,"context.state.stomp")
             context.state.stomp.connect({}, success => {
                 context.state.stomp.subscribe('/user/queue/chat', msg => {
                     let receiveMsg = JSON.parse(msg.body);
@@ -74,6 +76,7 @@ const store = new Vuex.Store({
                     context.commit('addMessage', receiveMsg);
                 })
             }, error => {
+                console.log("错误消息", error);
 
             })
         },
