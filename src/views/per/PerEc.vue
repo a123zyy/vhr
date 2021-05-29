@@ -1,58 +1,79 @@
 <template>
     <div>
-        <div style="height: 200px;margin-bottom: 10px;width: 100%">
-
+        <div style="height: 80px;margin-bottom: 10px;width: 100%">
+            <el-button icon="el-icon-search" type="primary" @click="getTable" :disabled="showAdvanceSearchView">
+                搜索
+            </el-button>
+            <el-button icon="" type="primary" @click="showHelpDialog('add')" :disabled="showAdvanceSearchView">
+                新增
+            </el-button>
         </div>
         <el-table
                 :data="tableData"
                 style="width: 100%">
             <el-table-column
                     prop="id"
-                    label="id"
-                    width="180">
+                    label="id">
             </el-table-column>
             <el-table-column
                     prop="rewardPunishmentType"
-                    label="姓名"
-                    width="180">
+                    label="奖惩类型">
                 <template slot-scope="scope">
                     <div>{{scope.row.rewardPunishmentType?'奖励':'惩罚'}}</div>
                 </template>
             </el-table-column>
             <el-table-column
                     prop="rewardPunishmentPrice"
-                    label="金额"
-                    width="180">
+                    label="奖惩金额"
+                   >
             </el-table-column>
             <el-table-column
                     prop="rewardPunishmentItems"
-                    label="物品"
-                    width="180">
+                    label="奖惩物品"
+                   >
             </el-table-column>
             <el-table-column
                     prop="empName"
-                    label="姓名"
-                    width="180">
+                    label="员工姓名"
+                    >
             </el-table-column>
             <el-table-column
                     prop="deptName"
                     label="部门"
-                    width="180">
+                    >
             </el-table-column>
             <el-table-column
                     prop="positionName"
                     label="职位"
-                    width="180">
+                    >
             </el-table-column>
             <el-table-column
                     prop="positionType"
                     label="职能"
-                    width="180">
+                    >
             </el-table-column>
             <el-table-column
                     prop="remark"
                     label="备注"
-                    width="180">
+                    >
+            </el-table-column>
+            <el-table-column
+                    prop="createDate"
+                    label="创建时间"
+                    >
+            </el-table-column>
+            <el-table-column
+                    prop="implementationData"
+                    label="生效时间"
+                    >
+            </el-table-column>
+            <el-table-column
+                    prop="status"
+                    label="当前状态"
+                   >
+                <template slot-scope="scope">
+                    <div>{{scope.row.status==0?'未生效':(scope.row.status==1?'未生效':'已取消')}}</div>
+                </template>
             </el-table-column>
         </el-table>
         <el-pagination
@@ -92,26 +113,16 @@
                     </el-date-picker>
                 </el-form-item>
                 <el-form-item label="选择人员">
-                    <el-select v-model="value" filterable placeholder="请选择">
+                    {{empsInfos.name}}
+                    <el-select v-model="empsInfos" filterable remote :remote-method	="selectEmp" placeholder="请选择">
                         <el-option
-                                v-for="item in options"
-                                :key="item.value"
-                                :label="item.label"
-                                :value="item.value">
+                                v-for="item in emps"
+                                :label="item.name+'-'+item.department.name"
+                                :value="item">
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="选择部门">
-                    <el-select v-model="value" filterable placeholder="请选择">
-                        <el-option
-                                v-for="item in options"
-                                :key="item.value"
-                                :label="item.label"
-                                :value="item.value">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="活动形式">
+                <el-form-item label="备注">
                     <el-input type="textarea" v-model="helperDialogData.remark"></el-input>
                 </el-form-item>
                 <el-form-item>
@@ -130,6 +141,9 @@
         name: "PerEc",
         data() {
             return {
+                empsInfos:{},
+                emps:{},
+                showAdvanceSearchView: false,
                 helperDialogData:{},
                 helperDialogDataType:'',
                 helperDialogShow:false,
@@ -137,9 +151,60 @@
                 total: 0,
                 pageSize: 10,
                 pageNum: 0,
+                empsTotal:0
             }
         },
         methods: {
+            selectDept(){
+
+            },
+            selectEmp(row){
+                const Employee = {
+                    pageNo:0,
+                    pageSize:10,
+                    politicId:null,
+                    nationId:null,
+                    jobLevelId:null,
+                    posId:null,
+                    engageForm:null,
+                    departmentId:null,
+                    beginDateScope:null,
+                    name:row
+                }
+                client.post('/employee/basic/',Employee).then(resp => {
+                    console.log(resp)
+                    if (resp) {
+                        this.emps = resp.data.data;
+                        this.empsTotal = resp.data.total;
+                    }
+                    this.empsInfos = {};
+
+                });
+            },
+            onSubmit(){
+                console.log("----23------")
+                console.log(this.empsInfos)
+                console.log("-----325435-----")
+                this.helperDialogData.empId= this.empsInfos.id
+                this.helperDialogData.empName = this.empsInfos.name
+                this.helperDialogData.deptId = this.empsInfos.department.id
+                this.helperDialogData.deptName = this.empsInfos.department.name
+                this.helperDialogData.positionId = this.empsInfos.position.id
+                this.helperDialogData.positionName =  this.empsInfos.position.name
+                this.helperDialogData.positionType =  this.empsInfos.position.positionType
+                if (this.helperDialogData.empId == ''|| this.helperDialogData.empId == undefined){
+                    alert("员工id不能为空")
+                }
+                client.post('rewardAndPunish/add',this.helperDialogData).then(data => {
+                    if (data.status == 200) {
+                        this.helperDialogShow  = false;
+                        this.pageNum = 0;
+                        this.getTable();
+                    }
+                }).catch(error => {
+
+                })
+            },
             showHelpDialog(dataJson, type) {
                 this.helperDialogDataType = type
                 if (type == 'edit') {
@@ -179,9 +244,8 @@
                         "remark":'',
                     }
                 }
+                this.selectEmp(null)
                 this.helperDialogShow = true
-            },
-            addPerEC(){
             },
             handleClose(done) {
                 this.$confirm('确认关闭？')
