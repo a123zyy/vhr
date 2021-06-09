@@ -48,11 +48,6 @@
                     >
             </el-table-column>
             <el-table-column
-                    prop="positionType"
-                    label="职能"
-                    >
-            </el-table-column>
-            <el-table-column
                     prop="remark"
                     label="备注"
                     >
@@ -75,21 +70,26 @@
                     <div>{{scope.row.status==0?'未生效':(scope.row.status==1?'未生效':'已取消')}}</div>
                 </template>
             </el-table-column>
+            <el-table-column label="操作">
+                <template slot-scope="scope">
+                    <el-button
+                            size="mini"
+                            @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+                </template>
+            </el-table-column>
         </el-table>
         <el-pagination
                 @size-change="handleSizeChange"
                 @current-change="handleCurrentChange"
                 :current-page="pageNum"
                 :page-size="pageSize"
-                :pager-count="1"
                 layout="prev, pager, next"
                 :total="total">
         </el-pagination>
         <el-dialog
                 :title="helperDialogDataType == 'edit' ? '修改数据':'新增数据'"
                 :visible.sync="helperDialogShow"
-                width="30%"
-                :before-close="handleClose">
+                width="30%">
             <el-form ref="form" :model="helperDialogData" label-width="80px">
                 <el-form-item label="类型">
                     <el-radio-group v-model="helperDialogData.rewardPunishmentType">
@@ -113,13 +113,13 @@
                     </el-date-picker>
                 </el-form-item>
                 <el-form-item label="选择人员">
-                    {{empsInfos.name}}
-                    <el-select v-model="empsInfos" filterable remote :remote-method	="selectEmp" placeholder="请选择">
-                        <el-option
-                                v-for="item in emps"
-                                :label="item.name+'-'+item.department.name"
-                                :value="item">
-                        </el-option>
+                    <el-select v-model="helperDialogData.empId" filterable remote :remote-method	="selectEmp" placeholder="请选择">
+                            <el-option
+                                    :key="item.id"
+                                    v-for="item in emps"
+                                    :label="item.name"
+                                    :value="item.id">
+                            </el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="备注">
@@ -155,8 +155,12 @@
             }
         },
         methods: {
-            selectDept(){
-
+            handleEdit(index, row) {
+                this.selectEmp(row.name)
+                this.showHelpDialog(row,'edit');
+            },
+            handleDelete(index, row) {
+                console.log(index, row);
             },
             selectEmp(row){
                 const Employee = {
@@ -172,37 +176,31 @@
                     name:row
                 }
                 client.post('/employee/basic/',Employee).then(resp => {
-                    console.log(resp)
                     if (resp) {
                         this.emps = resp.data.data;
+                        console.log(this.emps)
                         this.empsTotal = resp.data.total;
                     }
                     this.empsInfos = {};
-
                 });
             },
             onSubmit(){
-                console.log("----23------")
-                console.log(this.empsInfos)
-                console.log("-----325435-----")
-                this.helperDialogData.empId= this.empsInfos.id
-                this.helperDialogData.empName = this.empsInfos.name
-                this.helperDialogData.deptId = this.empsInfos.department.id
-                this.helperDialogData.deptName = this.empsInfos.department.name
-                this.helperDialogData.positionId = this.empsInfos.position.id
-                this.helperDialogData.positionName =  this.empsInfos.position.name
-                this.helperDialogData.positionType =  this.empsInfos.position.positionType
                 if (this.helperDialogData.empId == ''|| this.helperDialogData.empId == undefined){
-                    alert("员工id不能为空")
+                   return alert("员工id不能为空")
                 }
                 client.post('rewardAndPunish/add',this.helperDialogData).then(data => {
                     if (data.status == 200) {
                         this.helperDialogShow  = false;
                         this.pageNum = 0;
                         this.getTable();
+                    } else {
+                         alert("系统错误,"+data.toString())
+                        this.helperDialogShow  = false;
+
                     }
                 }).catch(error => {
-
+                     alert("系统错误,"+error.toString())
+                    this.helperDialogShow  = false;
                 })
             },
             showHelpDialog(dataJson, type) {
@@ -214,14 +212,8 @@
                         "rewardPunishmentPrice": dataJson.rewardPunishmentPrice,
                         "rewardPunishmentItems": dataJson.rewardPunishmentItems,
                         "empId": dataJson.empId,
-                        "empName": dataJson.empName,
-                        "deptName": dataJson.deptName,
-                        "deptId": dataJson.deptId,
                         "implementationData": dataJson.implementationData,
                         "createDate":dataJson.createDate,
-                        "positionName": dataJson.positionName,
-                        "positionId":dataJson.positionId,
-                        "positionType":dataJson.positionType,
                         "remark":dataJson.remark,
                         "status": dataJson.status,
 
@@ -234,13 +226,6 @@
                         "rewardPunishmentItems": '',
                         'status':1,
                         "implementationData": '',
-                        "empId":'',
-                        "empName":'',
-                        "deptName": '',
-                        "deptId":'',
-                        "positionName":'',
-                        "positionId":'',
-                        "positionType":'',
                         "remark":'',
                     }
                 }
