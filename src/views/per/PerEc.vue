@@ -126,7 +126,7 @@
                     <el-input type="textarea" v-model="helperDialogData.remark"></el-input>
                 </el-form-item>
                 <el-form-item>
-                    <el-button type="primary" @click="onSubmit">立即创建</el-button>
+                    <el-button type="primary" @click="onSubmit">{{this.helperDialogDataType === 'edit'?'修改':'新增'}}</el-button>
                     <el-button>取消</el-button>
                 </el-form-item>
             </el-form>
@@ -188,7 +188,7 @@
                 if (this.helperDialogData.empId == ''|| this.helperDialogData.empId == undefined){
                    return alert("员工id不能为空")
                 }
-                client.post('rewardAndPunish/add',this.helperDialogData).then(data => {
+                client.post(this.helperDialogDataType === 'edit'?'rewardAndPunish/update':'rewardAndPunish/add',this.helperDialogData).then(data => {
                     if (data.status == 200) {
                         this.helperDialogShow  = false;
                         this.pageNum = 0;
